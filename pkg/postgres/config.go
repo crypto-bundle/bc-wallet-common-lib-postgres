@@ -21,9 +21,6 @@ type PostgresConfig struct {
 	DbConnectRetryCount uint8 `envconfig:"DB_RETRY_COUNT" default:"0" json:"-"`
 	// DbConnectTimeOut is the timeout in millisecond to connect between connection tries
 	DbConnectTimeOut uint16 `envconfig:"DB_RETRY_TIMEOUT" default:"5000" json:"-"`
-
-	// --- CALCULATED ---
-	vaultData []byte
 }
 
 func (c *PostgresConfig) Prepare() error {

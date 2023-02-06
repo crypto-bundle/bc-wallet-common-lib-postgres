@@ -24,8 +24,8 @@ func (c *Connection) BeginTx() (*sqlx.Tx, error) {
 	return c.Dbx.Beginx()
 }
 
-// BeginTxWithUnlessCommittedRollback ....
-func (c *Connection) BeginTxWithUnlessCommittedRollback(ctx context.Context,
+// BeginTxWithRollbackOnError ....
+func (c *Connection) BeginTxWithRollbackOnError(ctx context.Context,
 	callback func(txStmtCtx context.Context) error,
 ) error {
 	txStmt, err := c.Dbx.Beginx()
