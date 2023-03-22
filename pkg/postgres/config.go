@@ -2,33 +2,26 @@ package postgres
 
 import (
 	"fmt"
-
-	"github.com/kelseyhightower/envconfig"
 )
 
 const ConfigPrefix = "DB"
 
 type PostgresConfig struct {
-	DbHost         string `envconfig:"DB_HOST" json:"-"`
-	DbPort         uint16 `envconfig:"DB_PORT" json:"-"`
-	DbName         string `envconfig:"DB_DATABASE" json:"-"`
-	DbUsername     string `envconfig:"DB_USERNAME" json:"DB_USERNAME"`
-	DbPassword     string `envconfig:"DB_PASSWORD" json:"DB_PASSWORD"`
-	DbSSLMode      string `envconfig:"DB_SSL_MODE" default:"prefer" json:"-"`
-	DbMaxOpenConns uint8  `envconfig:"DB_MAX_OPEN_CONNECTIONS" default:"8" json:"-"`
-	DbMaxIdleConns uint8  `envconfig:"DB_MAX_IDLE_CONNECTIONS" default:"8" json:"-"`
+	DbHost         string `envconfig:"DB_HOST"`
+	DbPort         uint16 `envconfig:"DB_PORT"`
+	DbName         string `envconfig:"DB_DATABASE" secret:"true"`
+	DbUsername     string `envconfig:"DB_USERNAME" secret:"true"`
+	DbPassword     string `envconfig:"DB_PASSWORD" secret:"true"`
+	DbSSLMode      string `envconfig:"DB_SSL_MODE" default:"prefer"`
+	DbMaxOpenConns uint8  `envconfig:"DB_MAX_OPEN_CONNECTIONS" default:"8"`
+	DbMaxIdleConns uint8  `envconfig:"DB_MAX_IDLE_CONNECTIONS" default:"8" `
 	// DbConnectRetryCount is the maximum number of reconnection tries. If 0 - infinite loop
-	DbConnectRetryCount uint8 `envconfig:"DB_RETRY_COUNT" default:"0" json:"-"`
+	DbConnectRetryCount uint8 `envconfig:"DB_RETRY_COUNT" default:"0"`
 	// DbConnectTimeOut is the timeout in millisecond to connect between connection tries
-	DbConnectTimeOut uint16 `envconfig:"DB_RETRY_TIMEOUT" default:"5000" json:"-"`
+	DbConnectTimeOut uint16 `envconfig:"DB_RETRY_TIMEOUT" default:"5000"`
 }
 
 func (c *PostgresConfig) Prepare() error {
-	err := envconfig.Process(ConfigPrefix, c)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
