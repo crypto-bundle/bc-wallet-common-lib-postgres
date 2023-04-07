@@ -58,6 +58,10 @@ func main() {
 
 ```
 
+## Contributors
+
+* Author and maintainer - [@gudron (Alex V Kotelnikov)](https://github.com/gudron)
+
 ## Licence
 
 **bc-wallet-common-lib-postgres** is licensed under the [MIT](./LICENSE) License.
