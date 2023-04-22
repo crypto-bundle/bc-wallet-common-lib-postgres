@@ -2,12 +2,12 @@ package postgres
 
 import (
 	"database/sql"
-	"errors"
+	"fmt"
 )
 
 func EmptyOrError(err error, errorMessage string) error {
 	if err == sql.ErrNoRows {
 		return nil
 	}
-	return errors.New(errorMessage)
+	return fmt.Errorf("%w:%s", err, errorMessage)
 }
