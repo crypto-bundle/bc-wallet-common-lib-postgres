@@ -5,7 +5,7 @@
 ### Changed
 
 #### Switching to a proprietary license.
-License of **bc-wallet-common-lib-postgres** repository changed to proprietary.
+License of **bc-wallet-common-lib-postgres** repository changed to proprietary in commit revision number - **b46a05a92d5aecd93a6dd22546fc598651d67648q**.
 
 The MIT license is replaced by me (_Kotelnikov Aleksei_) as an author and maintainer.
 
