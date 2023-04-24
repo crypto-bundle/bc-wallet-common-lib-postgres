@@ -64,4 +64,6 @@ func main() {
 
 ## Licence
 
-**bc-wallet-common-lib-postgres** is licensed under the [MIT](./LICENSE) License.
+Proprietary license
+
+Switcher to proprietary license from MIT - [CHANGELOG.MD - v0.0.7](./CHANGELOG.md)

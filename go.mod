@@ -1,10 +1,9 @@
-module github.com/crypto-bundle/bc-wallet-common-lib-postgres
+module gitlab.heronodes.io/bc-platform/bc-wallet-common-lib-postgres
 
-go 1.17
+go 1.19
 
 require (
 	github.com/jmoiron/sqlx v1.3.4
-	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lib/pq v1.10.4
 	go.uber.org/zap v1.21.0
 )
