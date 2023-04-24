@@ -18,10 +18,10 @@ Examples of create connection and write database communication code
 package main
 
 import (
-	commonEnvConfig "github.com/crypto-bundle/bc-wallet-common-lib-config/pkg/envconfig"
-    commonPostgres "github.com/crypto-bundle/bc-wallet-common-lib-postgres/pkg/postgres"
-	commonVault "github.com/crypto-bundle/bc-wallet-common-lib-vault/pkg/vault"
-	commonVaultTokenClient "github.com/crypto-bundle/bc-wallet-common-lib-vault/pkg/vault/client/token"
+	commonEnvConfig "gitlab.heronodes.io/bc-platform/bc-wallet-common-lib-postgres/pkg/envconfig"
+    commonPostgres "gitlab.heronodes.io/bc-platform/bc-wallet-common-lib-postgres/pkg/postgres"
+	commonVault "gitlab.heronodes.io/bc-platform/bc-wallet-common-lib-postgres/pkg/vault"
+	commonVaultTokenClient "gitlab.heronodes.io/bc-platform/bc-wallet-common-lib-postgres/pkg/vault/client/token"
 )
 
 type VaultWrappedConfig struct {
