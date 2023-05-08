@@ -18,6 +18,6 @@ The commit is signed with the key -
 gudron2s@gmail.com
 E456BB23A18A9347E952DBC6655133DD561BF3EC
 
-## [v0.0.8] - 09.05.2023
+## [v0.0.9] - 09.05.2023
 ### Changed
 * Added PostgreSQL helm-chart for local development. Chart cloned from [official Bitnami repository](https://github.com/bitnami/charts/tree/main/bitnami/postgresql)
