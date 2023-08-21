@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
 	"github.com/jmoiron/sqlx"
@@ -28,7 +29,43 @@ func (c *Connection) BeginTx() (*sqlx.Tx, error) {
 func (c *Connection) BeginTxWithRollbackOnError(ctx context.Context,
 	callback func(txStmtCtx context.Context) error,
 ) error {
+	return c.BeginReadCommittedTxRollbackOnError(ctx, callback)
+}
+
+func (c *Connection) BeginReadCommittedTxRollbackOnError(ctx context.Context,
+	callback func(txStmtCtx context.Context) error,
+) error {
 	txStmt, err := c.Dbx.Beginx()
+	if err != nil {
+		return err
+	}
+
+	newCtx := context.WithValue(ctx, transactionKey, txStmt)
+	err = callback(newCtx)
+	if err != nil {
+		rollbackErr := txStmt.Rollback()
+		if rollbackErr != nil {
+			return rollbackErr
+		}
+
+		return err
+	}
+
+	err = txStmt.Commit()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Connection) BeginReadUncommittedTxRollbackOnError(ctx context.Context,
+	callback func(txStmtCtx context.Context) error,
+) error {
+	txStmt, err := c.Dbx.BeginTx(ctx, &sql.TxOptions{
+		Isolation: sql.LevelReadUncommitted,
+		ReadOnly:  false,
+	})
 	if err != nil {
 		return err
 	}
