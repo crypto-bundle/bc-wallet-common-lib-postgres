@@ -1,4 +1,4 @@
-module gitlab.heronodes.io/bc-platform/bc-wallet-common-lib-postgres
+module github.com/crypto-bundle/bc-wallet-common-lib-postgres
 
 go 1.19
 

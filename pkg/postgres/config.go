@@ -4,8 +4,6 @@ import (
 	"fmt"
 )
 
-const ConfigPrefix = "DB"
-
 type PostgresConfig struct {
 	DbHost         string `envconfig:"DB_HOST"`
 	DbPort         uint16 `envconfig:"DB_PORT"`

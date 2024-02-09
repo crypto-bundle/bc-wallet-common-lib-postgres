@@ -17,8 +17,6 @@ type transactionCtxKey string
 var transactionKey = transactionCtxKey("transaction")
 var transactionCommittedKey = transactionCtxKey("is_committed")
 
-type txStmtCallback func(txStmtCtx context.Context) error
-
 // BeginTx ....
 func (c *Connection) BeginTx() (*sqlx.Tx, error) {
 	return c.Dbx.Beginx()

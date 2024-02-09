@@ -1,23 +1,39 @@
 # Change Log
 
-## [v0.0.7] - 24.04.2023 14:25 MSK
+## [v0.0.1] - 08.03.2022 00:48 MSK
+### Added
+* Added Postgresql connection wrapper 
+* Added transactional-statement helper functions
 
+## [v0.0.2] - 06.02.2023 22:04 MSK
 ### Changed
+* Lib-postgresl moved to another repository - https://github.com/crypto-bundle/bc-wallet-common-lib-postgres
+* Added MIT license
+* Transactional-statement helper-functions changes
+  * Added BeginTxWithUnlessCommittedRollback helper
+### Fixed
+* Bug in tx-statement management - missing err return
 
-#### Switching to a proprietary license.
-License of **bc-wallet-common-lib-postgres** repository changed to proprietary in commit revision number - **b46a05a92d5aecd93a6dd22546fc598651d67648q**.
-
-The MIT license is replaced by me (_Kotelnikov Aleksei_) as an author and maintainer.
-
-The license has been replaced with a proprietary one, with the condition of maintaining the authorship
-and specifying in the README.md file in the section of authors and contributors.
-
-[@gudron (Kotelnikov Aleksei)](https://github.com/gudron) - author and maintainer of [crypto-bundle project](https://github.com/crypto-bundle)
-
-The commit is signed with the key -
-gudron2s@gmail.com
-E456BB23A18A9347E952DBC6655133DD561BF3EC
-
-## [v0.0.9] - 09.05.2023
+## [v0.0.3] - 22.04.2023 19:48 MSK
 ### Changed
+* Modified PostgresSQL connection config - added _secret_ golang tag.
+* Some changes in [README.me](./README.md) file
+  * Added contributors sections
+  * Added code-examples
+* Tx-statement changes
+  * Helper function _BeginTxWithUnlessCommittedRollback_ renamed to _BeginTxWithRollbackOnError_
+
+## [v0.0.4] - 08.05.2023
+### Added
 * Added PostgreSQL helm-chart for local development. Chart cloned from [official Bitnami repository](https://github.com/bitnami/charts/tree/main/bitnami/postgresql)
+
+## [v0.0.5] - 09.02.2024
+### Changed
+* Added info about helm-chart to [CHANGELOG.md](./CHANGELOG.md) file
+* Added deployment commands of helm-chart to Makefile
+* Tx-statement changes
+  * Added _BeginReadCommittedTxRollbackOnError_ helper function
+  * Added _BeginReadUncommittedTxRollbackOnError_ helper function
+* Changed content of LICENSE file
+* Fixed mistake in code examples
+* Changed go-namespace
