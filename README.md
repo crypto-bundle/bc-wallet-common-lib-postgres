@@ -18,7 +18,7 @@ Examples of create connection and write database communication code
 package main
 
 import (
-	commonEnvConfig "github.com/crypto-bundle/bc-wallet-common-lib-config/pkg/envconfig"
+	commonEnvConfig "github.com/crypto-bundle/bc-wallet-common-lib-configs/pkg/envconfig"
     commonPostgres "github.com/crypto-bundle/bc-wallet-common-lib-postgres/pkg/postgres"
 	commonVault "github.com/crypto-bundle/bc-wallet-common-lib-vault/pkg/vault"
 	commonVaultTokenClient "github.com/crypto-bundle/bc-wallet-common-lib-vault/pkg/vault/client/token"

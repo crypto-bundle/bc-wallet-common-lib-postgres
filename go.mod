@@ -1,6 +1,6 @@
 module github.com/crypto-bundle/bc-wallet-common-lib-postgres
 
-go 1.17
+go 1.19
 
 require (
 	github.com/jmoiron/sqlx v1.3.4
