@@ -38,6 +38,15 @@ type Connection struct {
 	l      *zap.Logger
 }
 
+func (c *Connection) IsHealed(ctx context.Context) bool {
+	err := c.Dbx.PingContext(ctx)
+	if err != nil {
+		return false
+	}
+
+	return true
+}
+
 func (c *Connection) Close() error {
 	err := c.Dbx.Close()
 	if err != nil {
