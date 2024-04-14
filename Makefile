@@ -1,6 +1,16 @@
 
 default: deploy_postgresql
 
+
+build_dependecnsies:
+	$(if $(and $(env),$(repository)),,$(error 'env' and/or 'repository' is not defined))
+
+	$(eval context=$(or $(context),k0s-dev-cluster))
+	$(eval platform=$(or $(platform),linux/amd64))
+
+	helm --kube-context $(context) dependency build \
+		./deploy/helm/postgresql
+
 deploy_postgresql:
 	$(if $(and $(env),$(repository)),,$(error 'env' and/or 'repository' is not defined))
 
