@@ -5,18 +5,18 @@ import (
 )
 
 type PostgresConfig struct {
-	DbHost         string `envconfig:"DB_HOST"`
-	DbPort         uint16 `envconfig:"DB_PORT"`
-	DbName         string `envconfig:"DB_DATABASE" secret:"true"`
-	DbUsername     string `envconfig:"DB_USERNAME" secret:"true"`
-	DbPassword     string `envconfig:"DB_PASSWORD" secret:"true"`
-	DbSSLMode      string `envconfig:"DB_SSL_MODE" default:"prefer"`
-	DbMaxOpenConns uint8  `envconfig:"DB_MAX_OPEN_CONNECTIONS" default:"8"`
-	DbMaxIdleConns uint8  `envconfig:"DB_MAX_IDLE_CONNECTIONS" default:"8" `
+	DbHost         string `envconfig:"POSTGRESQL_SERVICE_HOST"`
+	DbPort         uint16 `envconfig:"POSTGRESQL_SERVICE_PORT"`
+	DbName         string `envconfig:"POSTGRESQL_DATABASE_NAME" secret:"true"`
+	DbUsername     string `envconfig:"POSTGRESQL_USERNAME" secret:"true"`
+	DbPassword     string `envconfig:"POSTGRESQL_PASSWORD" secret:"true"`
+	DbSSLMode      string `envconfig:"POSTGRESQL_SSL_MODE" default:"prefer"`
+	DbMaxOpenConns uint8  `envconfig:"POSTGRESQL_MAX_OPEN_CONNECTIONS" default:"8"`
+	DbMaxIdleConns uint8  `envconfig:"POSTGRESQL_MAX_IDLE_CONNECTIONS" default:"8" `
 	// DbConnectRetryCount is the maximum number of reconnection tries. If 0 - infinite loop
-	DbConnectRetryCount uint8 `envconfig:"DB_RETRY_COUNT" default:"0"`
+	DbConnectRetryCount uint8 `envconfig:"POSTGRESQL_CONNECTION_RETRY_COUNT" default:"0"`
 	// DbConnectTimeOut is the timeout in millisecond to connect between connection tries
-	DbConnectTimeOut uint16 `envconfig:"DB_RETRY_TIMEOUT" default:"5000"`
+	DbConnectTimeOut uint16 `envconfig:"POSTGRESQL_CONNECTION_RETRY_TIMEOUT" default:"5000"`
 }
 
 func (c *PostgresConfig) Prepare() error {
@@ -24,8 +24,8 @@ func (c *PostgresConfig) Prepare() error {
 }
 
 func (c *PostgresConfig) GetDatabaseDSN() string {
-	return fmt.Sprintf("mysql://%s:%s@%s/%s?sslmode=%t",
-		c.DbUsername, c.DbPassword, c.DbHost, c.DbName, c.DbSSLMode)
+	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",
+		c.DbUsername, c.DbPassword, c.DbHost, c.DbPort, c.DbName, c.DbSSLMode)
 }
 
 func (c *PostgresConfig) GetDbHost() string {
