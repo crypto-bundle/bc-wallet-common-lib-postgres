@@ -41,3 +41,9 @@
 ## [v0.0.6] - 14.04.2024
 ### Added
 * Added support of healthcheck flow, which required by [lib-healthcheck](https://github.com/crypto-bundle/bc-wallet-common-lib-healthcheck)
+
+## [v0.0.7] - 15.04.2024
+### Changed
+* Changed env variables name for supporting kubernetes naming standard:
+  * DB_HOST -> POSTGRESQL_SERVICE_HOST
+  * DB_PORT -> POSTGRESQL_SERVICE_PORT
