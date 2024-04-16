@@ -47,3 +47,7 @@
 * Changed env variables name for supporting kubernetes naming standard:
   * DB_HOST -> POSTGRESQL_SERVICE_HOST
   * DB_PORT -> POSTGRESQL_SERVICE_PORT
+
+## [v0.0.8] - 16.04.2024
+### Changed
+* Bump golang version 1.19 -> 1.22
