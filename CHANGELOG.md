@@ -1,5 +1,9 @@
 # Change Log
 
+## [v0.0.10] - 02.09.2024
+### Added
+* Added support of lib-errors
+
 ## [v0.0.9] - 21.06.2024
 ### Changed
 * Removed zap.Logger dependency. Replaced by std logger

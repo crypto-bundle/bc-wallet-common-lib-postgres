@@ -65,11 +65,13 @@ type connectionParams struct {
 
 // Connection struct to store and manipulate postgres database connection
 type Connection struct {
+	l *log.Logger
+	// dependencies
+	e errorFormatterService
+
 	Dbx *sqlx.DB
 
 	params *connectionParams
-
-	l *log.Logger
 }
 
 func (c *Connection) IsHealed(ctx context.Context) bool {
@@ -84,7 +86,7 @@ func (c *Connection) IsHealed(ctx context.Context) bool {
 func (c *Connection) Close() error {
 	err := c.Dbx.Close()
 	if err != nil {
-		return err
+		return c.e.ErrorOnly(err)
 	}
 
 	return nil
@@ -98,40 +100,48 @@ func (c *Connection) Connect() (*Connection, error) {
 		retryDecValue = 0
 		retryCount = 1
 	}
+
 	try := 0
 
+	var err error
+
 	for i := retryCount; i != 0; i -= retryDecValue {
-		dbx, err := sqlx.Connect("postgres", formatPostgresDSN(c.params))
-		if err != nil {
-			c.l.Printf("unable connect to postgres. reconnecting. error: %s. iteration: %d", err, try)
+		dbx, loopErr := sqlx.Connect("postgres", formatPostgresDSN(c.params))
+		if loopErr != nil {
+			c.l.Printf("unable connect to postgres. reconnecting. error: %s. iteration: %d", loopErr, try)
 			try++
 			time.Sleep(c.params.retryTimeOut)
+			err = loopErr
 
 			continue
 		}
 
-		err = dbx.Ping()
-		if err != nil {
-			c.l.Printf("unable ping postgres. reconnecting. error: %s. iteration: %d", err, try)
+		loopErr = dbx.Ping()
+		if loopErr != nil {
+			c.l.Printf("unable ping postgres. reconnecting. error: %s. iteration: %d", loopErr, try)
 			try++
 			time.Sleep(c.params.retryTimeOut)
+			err = loopErr
 
 			continue
 		}
 
-		rows, err := dbx.Query("SELECT 1")
-		if err != nil {
-			c.l.Printf("unable make sql request. reconnecting. error: %s. iteration: %d", err, try)
+		rows, loopErr := dbx.Query("SELECT 1")
+		if loopErr != nil {
+			c.l.Printf("unable make sql request. reconnecting. error: %s. iteration: %d", loopErr, try)
 			try++
 			time.Sleep(c.params.retryTimeOut)
+			err = loopErr
 
 			continue
 		}
-		err = rows.Close()
-		if err != nil {
-			c.l.Printf("unable to close rows statement. reconnecting. error: %s. iteration: %d", err, try)
+
+		loopErr = rows.Close()
+		if loopErr != nil {
+			c.l.Printf("unable to close rows statement. reconnecting. error: %s. iteration: %d", loopErr, try)
 			try++
 			time.Sleep(c.params.retryTimeOut)
+			err = loopErr
 
 			continue
 		}
@@ -140,14 +150,23 @@ func (c *Connection) Connect() (*Connection, error) {
 		dbx.SetMaxIdleConns(int(c.params.maxIdleConn))
 
 		c.Dbx = dbx
+
 		return c, nil
+	}
+
+	if err != nil {
+		return nil, c.e.ErrorOnly(err)
 	}
 
 	return c, nil
 }
 
 // NewConnection to postgres db
-func NewConnection(_ context.Context, cfg DbConfig, logger *log.Logger) *Connection {
+func NewConnection(_ context.Context,
+	cfg DbConfig,
+	logger *log.Logger,
+	errFmtSvc errorFormatterService,
+) *Connection {
 	conn := &Connection{
 		params: &connectionParams{
 			host:     cfg.GetDbHost(),
