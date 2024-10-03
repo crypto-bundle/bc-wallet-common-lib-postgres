@@ -39,18 +39,18 @@ import (
 var _ CommonDBConfig = (*PostgresConfig)(nil)
 
 type PostgresConfig struct {
-	DBHost         string `envconfig:"POSTGRESQL_SERVICE_HOST"`
-	DBPort         uint16 `envconfig:"POSTGRESQL_SERVICE_PORT"`
-	DBName         string `envconfig:"POSTGRESQL_DATABASE_NAME" secret:"true"`
-	DBUsername     string `envconfig:"POSTGRESQL_USERNAME" secret:"true"`
-	DBPassword     string `envconfig:"POSTGRESQL_PASSWORD" secret:"true"`
-	DBSSLMode      string `envconfig:"POSTGRESQL_SSL_MODE" default:"prefer"`
-	DBMaxOpenConns uint8  `envconfig:"POSTGRESQL_MAX_OPEN_CONNECTIONS" default:"8"`
-	DBMaxIdleConns uint8  `envconfig:"POSTGRESQL_MAX_IDLE_CONNECTIONS" default:"8" `
-	// DBConnectRetryCount is the maximum number of reconnection tries. If 0 - infinite loop
-	DBConnectRetryCount uint8 `envconfig:"POSTGRESQL_CONNECTION_RETRY_COUNT" default:"0"`
+	DBHost     string `envconfig:"POSTGRESQL_SERVICE_HOST"`
+	DBName     string `envconfig:"POSTGRESQL_DATABASE_NAME" secret:"true"`
+	DBUsername string `envconfig:"POSTGRESQL_USERNAME" secret:"true"`
+	DBPassword string `envconfig:"POSTGRESQL_PASSWORD" secret:"true"`
+	DBSSLMode  string `envconfig:"POSTGRESQL_SSL_MODE" default:"prefer"`
 	// DBConnectTimeOut is the timeout in millisecond to connect between connection tries
 	DBConnectTimeOut uint16 `envconfig:"POSTGRESQL_CONNECTION_RETRY_TIMEOUT" default:"5000"`
+	DBPort           uint16 `envconfig:"POSTGRESQL_SERVICE_PORT"`
+	DBMaxOpenConns   uint8  `envconfig:"POSTGRESQL_MAX_OPEN_CONNECTIONS" default:"8"`
+	DBMaxIdleConns   uint8  `envconfig:"POSTGRESQL_MAX_IDLE_CONNECTIONS" default:"8" `
+	// DBConnectRetryCount is the maximum number of reconnection tries. If 0 - infinite loop
+	DBConnectRetryCount uint8 `envconfig:"POSTGRESQL_CONNECTION_RETRY_COUNT" default:"0"`
 }
 
 func (c *PostgresConfig) Prepare() error {

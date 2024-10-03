@@ -47,6 +47,7 @@ var (
 
 type transactionCtxKey string
 
+//nolint:gochecknoglobals // it's ok
 var transactionKey = transactionCtxKey("transaction")
 
 // BeginTx ....

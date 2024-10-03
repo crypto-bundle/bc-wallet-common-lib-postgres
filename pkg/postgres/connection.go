@@ -39,31 +39,36 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+
 	_ "github.com/lib/pq"
 )
 
+func formatPostgresDSN(params *connectionParams) string {
+	return fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=%s",
+		params.host, params.port, params.user, params.password, params.database, params.sslMode)
+}
+
 type connectionParams struct {
 	host     string
-	port     uint16
 	user     string
 	password string
+	sslMode  string
+
 	database string
 
 	retryTimeOut time.Duration
+	port         uint16
 	retryCount   uint8
-
-	maxOpenConn uint8
-	maxIdleConn uint8
-
-	sslMode string
+	maxOpenConn  uint8
+	maxIdleConn  uint8
 
 	debug bool
 }
 
-// Connection struct to store and manipulate postgres database connection
+// Connection struct to store and manipulate postgres database connection...
 type Connection struct {
 	l *slog.Logger
-	// dependencies
 	e errorFormatterService
 
 	Dbx *sqlx.DB
@@ -73,8 +78,31 @@ type Connection struct {
 
 func (c *Connection) IsHealed(ctx context.Context) bool {
 	err := c.Dbx.PingContext(ctx)
+	if err != nil {
+		return false
+	}
+
+	err = c.checkConnectionByQuery(c.Dbx)
 
 	return err == nil
+}
+
+func (c *Connection) checkConnectionByQuery(dbx *sqlx.DB) error {
+	rows, err := dbx.Query("SELECT 1")
+	if err != nil {
+		return c.e.ErrorOnly(err)
+	}
+
+	defer func() {
+		_ = rows.Close()
+	}()
+
+	err = rows.Err()
+	if err != nil {
+		return c.e.ErrorOnly(err)
+	}
+
+	return nil
 }
 
 func (c *Connection) Close() error {
@@ -86,7 +114,7 @@ func (c *Connection) Close() error {
 	return nil
 }
 
-// Connect to postgres database
+// Connect to postgres database...
 func (c *Connection) Connect() (*Connection, error) {
 	retryDecValue := uint8(1)
 	retryCount := c.params.retryCount
@@ -101,48 +129,14 @@ func (c *Connection) Connect() (*Connection, error) {
 	var err error
 
 	for i := retryCount; i != 0; i -= retryDecValue {
-		dbx, loopErr := sqlx.Connect("postgres", formatPostgresDSN(c.params))
+		dbx, loopErr := c.tryConnect()
 		if loopErr != nil {
-			c.l.Error("unable connect to postgres", loopErr,
+			c.l.Error("unable to connect to database", loopErr,
 				slog.Int(ConnectionRetryCountTag, try))
-			try++
-			time.Sleep(c.params.retryTimeOut)
+
 			err = loopErr
 
-			continue
-		}
-
-		loopErr = dbx.Ping()
-		if loopErr != nil {
-			c.l.Error("unable ping postgres. reconnecting", loopErr,
-				slog.Int(ConnectionRetryCountTag, try))
-			try++
 			time.Sleep(c.params.retryTimeOut)
-			err = loopErr
-
-			continue
-		}
-
-		rows, loopErr := dbx.Query("SELECT 1")
-		if loopErr != nil || rows.Err() != nil {
-			c.l.Error("unable make sql request. reconnecting", loopErr,
-				slog.Int(ConnectionRetryCountTag, try))
-			try++
-			time.Sleep(c.params.retryTimeOut)
-			err = loopErr
-
-			continue
-		}
-
-		loopErr = rows.Close()
-		if loopErr != nil {
-			c.l.Error("unable to close rows statement. reconnecting", loopErr,
-				slog.Int(ConnectionRetryCountTag, try))
-			try++
-
-			time.Sleep(c.params.retryTimeOut)
-
-			err = loopErr
 
 			continue
 		}
@@ -162,7 +156,26 @@ func (c *Connection) Connect() (*Connection, error) {
 	return c, nil
 }
 
-// NewConnection to postgres db
+func (c *Connection) tryConnect() (*sqlx.DB, error) {
+	dbx, err := sqlx.Connect("postgres", formatPostgresDSN(c.params))
+	if err != nil {
+		return nil, c.e.ErrorOnly(err)
+	}
+
+	err = dbx.Ping()
+	if err != nil {
+		return nil, c.e.ErrorOnly(err)
+	}
+
+	err = c.checkConnectionByQuery(dbx)
+	if err != nil {
+		return nil, err
+	}
+
+	return dbx, nil
+}
+
+// NewConnection to postgres db...
 func NewConnection(_ context.Context,
 	logFactorySvc loggerService,
 	errFormatterSvc errorFormatterService,
@@ -192,10 +205,4 @@ func NewConnection(_ context.Context,
 	}
 
 	return conn
-}
-
-func formatPostgresDSN(params *connectionParams) string {
-	return fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=%s",
-		params.host, params.port, params.user, params.password, params.database, params.sslMode)
 }
