@@ -31,3 +31,7 @@
  */
 
 package postgres
+
+const (
+	ConnectionRetryCountTag = "retry_count"
+)

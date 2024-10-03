@@ -48,11 +48,15 @@ var (
 type transactionCtxKey string
 
 var transactionKey = transactionCtxKey("transaction")
-var transactionCommittedKey = transactionCtxKey("is_committed")
 
 // BeginTx ....
 func (c *Connection) BeginTx() (*sqlx.Tx, error) {
-	return c.Dbx.Beginx()
+	tx, err := c.Dbx.Beginx()
+	if err != nil {
+		return nil, c.e.ErrorOnly(err)
+	}
+
+	return tx, nil
 }
 
 // BeginTxWithRollbackOnError ....
@@ -61,7 +65,7 @@ func (c *Connection) BeginTxWithRollbackOnError(ctx context.Context,
 ) error {
 	err := c.BeginReadCommittedTxRollbackOnError(ctx, callback)
 	if err != nil {
-		return c.e.ErrorOnly(err)
+		return c.e.ErrorNoWrap(err)
 	}
 
 	return nil
@@ -76,6 +80,7 @@ func (c *Connection) BeginReadCommittedTxRollbackOnError(ctx context.Context,
 	}
 
 	newCtx := context.WithValue(ctx, transactionKey, txStmt)
+
 	err = callback(newCtx)
 	if err != nil {
 		rollbackErr := txStmt.Rollback()
@@ -106,11 +111,14 @@ func (c *Connection) BeginReadUncommittedTxRollbackOnError(ctx context.Context,
 	}
 
 	newCtx := context.WithValue(ctx, transactionKey, txStmt)
+
 	err = callback(newCtx)
 	if err != nil {
 		rollbackErr := txStmt.Rollback()
 		if rollbackErr != nil {
-			return rollbackErr
+			c.l.Warn("unable to rollback transaction, probably tx in pending status", rollbackErr)
+
+			return c.e.ErrorOnly(rollbackErr)
 		}
 
 		return c.e.ErrorOnly(err)
@@ -141,7 +149,12 @@ func (c *Connection) CommitContextualTxStatement(ctx context.Context) error {
 		return c.e.ErrorOnly(ErrNotInContextualTxStatement)
 	}
 
-	return tx.Commit()
+	err := tx.Commit()
+	if err != nil {
+		return c.e.ErrorOnly(err)
+	}
+
+	return nil
 }
 
 // RollbackContextualTxStatement ....
@@ -151,10 +164,15 @@ func (c *Connection) RollbackContextualTxStatement(ctx context.Context) error {
 		return c.e.ErrorOnly(ErrNotInContextualTxStatement)
 	}
 
-	return tx.Rollback()
+	err := tx.Rollback()
+	if err != nil {
+		return c.e.ErrorOnly(err)
+	}
+
+	return nil
 }
 
-func (c *Connection) TryWithTransaction(ctx context.Context, fn func(stmt sqlx.Ext) error) error {
+func (c *Connection) TryWithTransaction(ctx context.Context, sqlExecutionFunc func(stmt sqlx.Ext) error) error {
 	stmt := sqlx.Ext(c.Dbx)
 
 	tx, inTransaction := ctx.Value(transactionKey).(*sqlx.Tx)
@@ -162,13 +180,13 @@ func (c *Connection) TryWithTransaction(ctx context.Context, fn func(stmt sqlx.E
 		stmt = tx
 	}
 
-	return fn(stmt)
+	return sqlExecutionFunc(stmt)
 }
 
-func (c *Connection) MustWithTransaction(ctx context.Context, fn func(stmt *sqlx.Tx) error) error {
+func (c *Connection) MustWithTransaction(ctx context.Context, sqlInTxExecutionFunc func(stmt *sqlx.Tx) error) error {
 	tx, inTransaction := ctx.Value(transactionKey).(*sqlx.Tx)
 	if inTransaction {
-		return fn(tx)
+		return sqlInTxExecutionFunc(tx)
 	}
 
 	return c.e.ErrorOnly(ErrUnableGetTransactionFromContext)

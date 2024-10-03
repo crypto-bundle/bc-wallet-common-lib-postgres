@@ -35,7 +35,7 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -52,9 +52,6 @@ type connectionParams struct {
 	retryTimeOut time.Duration
 	retryCount   uint8
 
-	readTimeOut  int
-	writeTimeOut int
-
 	maxOpenConn uint8
 	maxIdleConn uint8
 
@@ -65,7 +62,7 @@ type connectionParams struct {
 
 // Connection struct to store and manipulate postgres database connection
 type Connection struct {
-	l *log.Logger
+	l *slog.Logger
 	// dependencies
 	e errorFormatterService
 
@@ -76,11 +73,8 @@ type Connection struct {
 
 func (c *Connection) IsHealed(ctx context.Context) bool {
 	err := c.Dbx.PingContext(ctx)
-	if err != nil {
-		return false
-	}
 
-	return true
+	return err == nil
 }
 
 func (c *Connection) Close() error {
@@ -96,6 +90,7 @@ func (c *Connection) Close() error {
 func (c *Connection) Connect() (*Connection, error) {
 	retryDecValue := uint8(1)
 	retryCount := c.params.retryCount
+
 	if retryCount == 0 {
 		retryDecValue = 0
 		retryCount = 1
@@ -108,7 +103,8 @@ func (c *Connection) Connect() (*Connection, error) {
 	for i := retryCount; i != 0; i -= retryDecValue {
 		dbx, loopErr := sqlx.Connect("postgres", formatPostgresDSN(c.params))
 		if loopErr != nil {
-			c.l.Printf("unable connect to postgres. reconnecting. error: %s. iteration: %d", loopErr, try)
+			c.l.Error("unable connect to postgres", loopErr,
+				slog.Int(ConnectionRetryCountTag, try))
 			try++
 			time.Sleep(c.params.retryTimeOut)
 			err = loopErr
@@ -118,7 +114,8 @@ func (c *Connection) Connect() (*Connection, error) {
 
 		loopErr = dbx.Ping()
 		if loopErr != nil {
-			c.l.Printf("unable ping postgres. reconnecting. error: %s. iteration: %d", loopErr, try)
+			c.l.Error("unable ping postgres. reconnecting", loopErr,
+				slog.Int(ConnectionRetryCountTag, try))
 			try++
 			time.Sleep(c.params.retryTimeOut)
 			err = loopErr
@@ -127,8 +124,9 @@ func (c *Connection) Connect() (*Connection, error) {
 		}
 
 		rows, loopErr := dbx.Query("SELECT 1")
-		if loopErr != nil {
-			c.l.Printf("unable make sql request. reconnecting. error: %s. iteration: %d", loopErr, try)
+		if loopErr != nil || rows.Err() != nil {
+			c.l.Error("unable make sql request. reconnecting", loopErr,
+				slog.Int(ConnectionRetryCountTag, try))
 			try++
 			time.Sleep(c.params.retryTimeOut)
 			err = loopErr
@@ -138,9 +136,12 @@ func (c *Connection) Connect() (*Connection, error) {
 
 		loopErr = rows.Close()
 		if loopErr != nil {
-			c.l.Printf("unable to close rows statement. reconnecting. error: %s. iteration: %d", loopErr, try)
+			c.l.Error("unable to close rows statement. reconnecting", loopErr,
+				slog.Int(ConnectionRetryCountTag, try))
 			try++
+
 			time.Sleep(c.params.retryTimeOut)
+
 			err = loopErr
 
 			continue
@@ -163,29 +164,31 @@ func (c *Connection) Connect() (*Connection, error) {
 
 // NewConnection to postgres db
 func NewConnection(_ context.Context,
-	cfg DbConfig,
-	logger *log.Logger,
-	errFmtSvc errorFormatterService,
+	logFactorySvc loggerService,
+	errFormatterSvc errorFormatterService,
+	cfgSvc DBConfigService,
 ) *Connection {
 	conn := &Connection{
+		e: errFormatterSvc,
+		l: logFactorySvc.NewSlogNamedLoggerEntry("lib-postgres"),
 		params: &connectionParams{
-			host:     cfg.GetDbHost(),
-			port:     cfg.GetDbPort(),
-			user:     cfg.GetDbUser(),
-			password: cfg.GetDbPassword(),
-			database: cfg.GetDbName(),
+			host:     cfgSvc.GetDBHost(),
+			port:     cfgSvc.GetDBPort(),
+			user:     cfgSvc.GetDBUser(),
+			password: cfgSvc.GetDBPassword(),
+			database: cfgSvc.GetDBName(),
 
-			retryCount:   cfg.GetDbRetryCount(),
-			retryTimeOut: time.Duration(cfg.GetDbConnectTimeOut()) * time.Millisecond,
+			retryCount:   cfgSvc.GetDBRetryCount(),
+			retryTimeOut: time.Duration(cfgSvc.GetDBConnectTimeOut()) * time.Millisecond,
 
-			maxOpenConn: cfg.GetDbMaxOpenConns(),
-			maxIdleConn: cfg.GetDbMaxIdleConns(),
+			maxOpenConn: cfgSvc.GetDBMaxOpenConns(),
+			maxIdleConn: cfgSvc.GetDBMaxIdleConns(),
 
-			debug: cfg.IsDebug(),
+			debug: cfgSvc.IsDebug(),
 
-			sslMode: cfg.GetDbTLSMode(),
+			sslMode: cfgSvc.GetDBTLSMode(),
 		},
-		l: logger,
+		Dbx: nil,
 	}
 
 	return conn

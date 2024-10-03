@@ -32,6 +32,15 @@
 
 package postgres
 
+import "log/slog"
+
+type loggerService interface {
+	NewSlogLoggerEntry(fields ...any) *slog.Logger
+	NewSlogNamedLoggerEntry(named string, fields ...any) *slog.Logger
+	NewSlogLoggerEntryWithFields(fields ...slog.Attr) *slog.Logger
+}
+
+//nolint:interfacebloat //it's ok here, we need it we must use it as one big interface
 type errorFormatterService interface {
 	ErrorWithCode(err error, code int) error
 	ErrWithCode(err error, code int) error
@@ -46,4 +55,27 @@ type errorFormatterService interface {
 	Errorf(err error, format string, args ...interface{}) error
 	NewError(details ...string) error
 	NewErrorf(format string, args ...interface{}) error
+}
+
+type BaseConfig interface {
+	IsDebug() bool
+}
+
+type CommonDBConfig interface {
+	GetDBHost() string
+	GetDBPort() uint16
+	GetDBName() string
+	GetDBUser() string
+	GetDBPassword() string
+	GetDBTLSMode() string
+	GetDBRetryCount() uint8
+	GetDBConnectTimeOut() uint16
+
+	GetDBMaxOpenConns() uint8
+	GetDBMaxIdleConns() uint8
+}
+
+type DBConfigService interface {
+	BaseConfig
+	CommonDBConfig
 }

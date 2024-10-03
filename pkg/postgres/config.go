@@ -36,19 +36,21 @@ import (
 	"fmt"
 )
 
+var _ CommonDBConfig = (*PostgresConfig)(nil)
+
 type PostgresConfig struct {
-	DbHost         string `envconfig:"POSTGRESQL_SERVICE_HOST"`
-	DbPort         uint16 `envconfig:"POSTGRESQL_SERVICE_PORT"`
-	DbName         string `envconfig:"POSTGRESQL_DATABASE_NAME" secret:"true"`
-	DbUsername     string `envconfig:"POSTGRESQL_USERNAME" secret:"true"`
-	DbPassword     string `envconfig:"POSTGRESQL_PASSWORD" secret:"true"`
-	DbSSLMode      string `envconfig:"POSTGRESQL_SSL_MODE" default:"prefer"`
-	DbMaxOpenConns uint8  `envconfig:"POSTGRESQL_MAX_OPEN_CONNECTIONS" default:"8"`
-	DbMaxIdleConns uint8  `envconfig:"POSTGRESQL_MAX_IDLE_CONNECTIONS" default:"8" `
-	// DbConnectRetryCount is the maximum number of reconnection tries. If 0 - infinite loop
-	DbConnectRetryCount uint8 `envconfig:"POSTGRESQL_CONNECTION_RETRY_COUNT" default:"0"`
-	// DbConnectTimeOut is the timeout in millisecond to connect between connection tries
-	DbConnectTimeOut uint16 `envconfig:"POSTGRESQL_CONNECTION_RETRY_TIMEOUT" default:"5000"`
+	DBHost         string `envconfig:"POSTGRESQL_SERVICE_HOST"`
+	DBPort         uint16 `envconfig:"POSTGRESQL_SERVICE_PORT"`
+	DBName         string `envconfig:"POSTGRESQL_DATABASE_NAME" secret:"true"`
+	DBUsername     string `envconfig:"POSTGRESQL_USERNAME" secret:"true"`
+	DBPassword     string `envconfig:"POSTGRESQL_PASSWORD" secret:"true"`
+	DBSSLMode      string `envconfig:"POSTGRESQL_SSL_MODE" default:"prefer"`
+	DBMaxOpenConns uint8  `envconfig:"POSTGRESQL_MAX_OPEN_CONNECTIONS" default:"8"`
+	DBMaxIdleConns uint8  `envconfig:"POSTGRESQL_MAX_IDLE_CONNECTIONS" default:"8" `
+	// DBConnectRetryCount is the maximum number of reconnection tries. If 0 - infinite loop
+	DBConnectRetryCount uint8 `envconfig:"POSTGRESQL_CONNECTION_RETRY_COUNT" default:"0"`
+	// DBConnectTimeOut is the timeout in millisecond to connect between connection tries
+	DBConnectTimeOut uint16 `envconfig:"POSTGRESQL_CONNECTION_RETRY_TIMEOUT" default:"5000"`
 }
 
 func (c *PostgresConfig) Prepare() error {
@@ -57,45 +59,45 @@ func (c *PostgresConfig) Prepare() error {
 
 func (c *PostgresConfig) GetDatabaseDSN() string {
 	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-		c.DbHost, c.DbPort, c.DbUsername, c.DbPassword, c.DbName, c.DbSSLMode)
+		c.DBHost, c.DBPort, c.DBUsername, c.DBPassword, c.DBName, c.DBSSLMode)
 }
 
-func (c *PostgresConfig) GetDbHost() string {
-	return c.DbHost
+func (c *PostgresConfig) GetDBHost() string {
+	return c.DBHost
 }
 
-func (c *PostgresConfig) GetDbPort() uint16 {
-	return c.DbPort
+func (c *PostgresConfig) GetDBPort() uint16 {
+	return c.DBPort
 }
 
-func (c *PostgresConfig) GetDbName() string {
-	return c.DbName
+func (c *PostgresConfig) GetDBName() string {
+	return c.DBName
 }
 
-func (c *PostgresConfig) GetDbUser() string {
-	return c.DbUsername
+func (c *PostgresConfig) GetDBUser() string {
+	return c.DBUsername
 }
 
-func (c *PostgresConfig) GetDbPassword() string {
-	return c.DbPassword
+func (c *PostgresConfig) GetDBPassword() string {
+	return c.DBPassword
 }
 
-func (c *PostgresConfig) GetDbTLSMode() string {
-	return c.DbSSLMode
+func (c *PostgresConfig) GetDBTLSMode() string {
+	return c.DBSSLMode
 }
 
-func (c *PostgresConfig) GetDbRetryCount() uint8 {
-	return c.DbConnectRetryCount
+func (c *PostgresConfig) GetDBRetryCount() uint8 {
+	return c.DBConnectRetryCount
 }
 
-func (c *PostgresConfig) GetDbConnectTimeOut() uint16 {
-	return c.DbConnectTimeOut
+func (c *PostgresConfig) GetDBConnectTimeOut() uint16 {
+	return c.DBConnectTimeOut
 }
 
-func (c *PostgresConfig) GetDbMaxOpenConns() uint8 {
-	return c.DbMaxOpenConns
+func (c *PostgresConfig) GetDBMaxOpenConns() uint8 {
+	return c.DBMaxOpenConns
 }
 
-func (c *PostgresConfig) GetDbMaxIdleConns() uint8 {
-	return c.DbMaxIdleConns
+func (c *PostgresConfig) GetDBMaxIdleConns() uint8 {
+	return c.DBMaxIdleConns
 }
