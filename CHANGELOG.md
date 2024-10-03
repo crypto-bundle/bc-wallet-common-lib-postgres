@@ -1,8 +1,10 @@
 # Change Log
 
-## [v0.0.10] - 02.09.2024
+## [v0.0.10] - 03.10.2024
 ### Added
 * Added support of lib-errors
+* Added support of lib-logger
+* Added linters checks, also fixed all linters issues
 
 ## [v0.0.9] - 21.06.2024
 ### Changed
