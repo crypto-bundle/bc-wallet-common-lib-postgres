@@ -1,6 +1,5 @@
 
-default: deploy_postgresql
-
+default: lint
 
 build_dependecnsies:
 	$(if $(and $(env),$(repository)),,$(error 'env' and/or 'repository' is not defined))
@@ -31,4 +30,7 @@ destroy_postgresql:
 
 	helm --kube-context $(context) uninstall postgresql
 
-.PHONY: deploy_postgresql
+lint:
+	golangci-lint run --config .golangci.yml -v ./...
+
+.PHONY: deploy_postgresql lint
