@@ -6,7 +6,7 @@
 * Updated License
   * Copyright - new year 2025
   * Added License banner to *.go files
-  * Added License of Bitnami Redis Helm Chart
+  * Added License of Bitnami PostgreSQL Helm Chart
 * Added support of lib-errors/lib-tinyerrors
 * Added linter and fixed up all linter issues
 
