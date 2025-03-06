@@ -1,5 +1,15 @@
 # Change Log
 
+## [v0.0.11] - 07.03.2025
+### Changed
+* Added support of Go 1.23
+* Updated License
+  * Copyright - new year 2025
+  * Added License banner to *.go files
+  * Added License of Bitnami Redis Helm Chart
+* Added support of lib-errors/lib-tinyerrors
+* Added linter and fixed up all linter issues
+
 ## [v0.0.10] - 03.10.2024
 ### Added
 * Added support of lib-errors
