@@ -64,4 +64,5 @@ func main() {
 
 ## Licence
 
-**bc-wallet-common-lib-postgres** is licensed under the [MIT](./LICENSE) License.
+* **bc-wallet-common-lib-postgres** is licensed under the [MIT NON-AI](./LICENSE) License.
+* **bitnami PostgreSQL helm chart** licensed under the [Apache License, Version 2.0.](./deploy/helm/LICENSE.md)
