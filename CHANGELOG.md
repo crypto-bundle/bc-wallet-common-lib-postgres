@@ -7,7 +7,7 @@
   * Copyright - new year 2025
   * Added License banner to *.go files
   * Added License of Bitnami PostgreSQL Helm Chart
-* Added support of lib-errors/lib-tinyerrors
+* Added support of last version of lib-errors/lib-tinyerrors
 * Added linter and fixed up all linter issues
 
 ## [v0.0.10] - 03.10.2024
