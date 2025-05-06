@@ -34,6 +34,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log/slog"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -115,7 +116,8 @@ func (c *Connection) BeginReadUncommittedTxRollbackOnError(ctx context.Context,
 	if err != nil {
 		rollbackErr := txStmt.Rollback()
 		if rollbackErr != nil {
-			c.l.Warn("unable to rollback transaction, probably tx in pending status", rollbackErr)
+			c.l.Warn("unable to rollback transaction, probably tx in pending status",
+				slog.Any("error", rollbackErr))
 
 			return c.e.ErrorOnly(rollbackErr)
 		}
