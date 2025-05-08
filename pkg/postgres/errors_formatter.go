@@ -30,46 +30,53 @@
 
 package postgres
 
-import "log/slog"
+import (
+	"fmt"
+	"strings"
+)
 
-type loggerService interface {
-	NewSlogLoggerEntry(fields ...any) *slog.Logger
-	NewSlogNamedLoggerEntry(named string, fields ...any) *slog.Logger
-	NewSlogLoggerEntryWithFields(fields ...slog.Attr) *slog.Logger
+var _ errorFormatterService = (*errFmt)(nil)
+
+// ATTENTION: DO NOT USE THIS ERROR FORMATTER IN APPLICATION CODE
+//
+// errFmt - internal implementation of standard crypto-bundle error formatter service,
+// only for lib-postgres library...
+type errFmt struct {
 }
 
-//nolint:interfacebloat //it's ok here, we need it we must use it as one big interface
-type errorFormatterService interface {
-	// ErrorNoWrap function for pseudo-wrap error, must be used in case of linter warnings...
-	ErrorNoWrap(err error) error
-	// ErrNoWrap same with ErrorNoWrap function, just alias for ErrorNoWrap, just short function name...
-	ErrNoWrap(err error) error
-	ErrorOnly(err error, details ...string) error
-	Error(err error, details ...string) error
-	Errorf(err error, format string, args ...interface{}) error
-	NewError(details ...string) error
-	NewErrorf(format string, args ...interface{}) error
+func (f *errFmt) ErrorNoWrap(err error) error {
+	return f.ErrNoWrap(err)
 }
 
-type BaseConfig interface {
-	IsDebug() bool
+func (f *errFmt) ErrNoWrap(err error) error {
+	return err
 }
 
-type CommonDBConfig interface {
-	GetDBHost() string
-	GetDBPort() uint16
-	GetDBName() string
-	GetDBUser() string
-	GetDBPassword() string
-	GetDBTLSMode() string
-	GetDBRetryCount() uint8
-	GetDBConnectTimeOut() uint16
-
-	GetDBMaxOpenConns() uint8
-	GetDBMaxIdleConns() uint8
+func (f *errFmt) ErrorOnly(err error, data ...string) error {
+	return fmt.Errorf("%w: %s", err, strings.Join(data, "-"))
 }
 
-type DBConfigService interface {
-	BaseConfig
-	CommonDBConfig
+func (f *errFmt) Error(err error, data ...string) error {
+	return fmt.Errorf("%w: %s", err, strings.Join(data, "-"))
+}
+
+func (f *errFmt) Errorf(err error, format string, args ...interface{}) error {
+	return f.ErrorOnly(err, fmt.Sprintf(format, args...))
+}
+
+//nolint:err113
+func (f *errFmt) NewError(details ...string) error {
+	return fmt.Errorf("%s", strings.Join(details, ", "))
+}
+
+//nolint:err113
+func (f *errFmt) NewErrorf(format string, args ...interface{}) error {
+	return fmt.Errorf(
+		"%s",
+		strings.Join([]string{fmt.Sprintf(format, args...)}, ", "),
+	)
+}
+
+func newConfigErrFormatter() *errFmt {
+	return &errFmt{}
 }

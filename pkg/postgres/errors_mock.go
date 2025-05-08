@@ -30,46 +30,75 @@
 
 package postgres
 
-import "log/slog"
+import "errors"
 
-type loggerService interface {
-	NewSlogLoggerEntry(fields ...any) *slog.Logger
-	NewSlogNamedLoggerEntry(named string, fields ...any) *slog.Logger
-	NewSlogLoggerEntryWithFields(fields ...slog.Attr) *slog.Logger
+var _ errorFormatterService = (*mockErrFmt)(nil)
+
+// ATTENTION: DO NOT USE THIS ERROR FORMATTER IN PRODUCTION CODE.
+//
+// errMockFormatterSvc - internal implementation of standard crypto-bundle error formatter service,
+// only for mock scenario...
+var errMockFormatterSvc = errors.New("mock_err_formatter")
+
+type mockErrFmt struct {
 }
 
-//nolint:interfacebloat //it's ok here, we need it we must use it as one big interface
-type errorFormatterService interface {
-	// ErrorNoWrap function for pseudo-wrap error, must be used in case of linter warnings...
-	ErrorNoWrap(err error) error
-	// ErrNoWrap same with ErrorNoWrap function, just alias for ErrorNoWrap, just short function name...
-	ErrNoWrap(err error) error
-	ErrorOnly(err error, details ...string) error
-	Error(err error, details ...string) error
-	Errorf(err error, format string, args ...interface{}) error
-	NewError(details ...string) error
-	NewErrorf(format string, args ...interface{}) error
+func (f *mockErrFmt) NewErrorWithCode(text string, code int) error {
+	return errMockFormatterSvc
 }
 
-type BaseConfig interface {
-	IsDebug() bool
+func (f *mockErrFmt) ErrorCodeIsOneOf(err error, codes ...int) (int, bool) {
+	return -1, false
 }
 
-type CommonDBConfig interface {
-	GetDBHost() string
-	GetDBPort() uint16
-	GetDBName() string
-	GetDBUser() string
-	GetDBPassword() string
-	GetDBTLSMode() string
-	GetDBRetryCount() uint8
-	GetDBConnectTimeOut() uint16
-
-	GetDBMaxOpenConns() uint8
-	GetDBMaxIdleConns() uint8
+func (f *mockErrFmt) ErrCodeIsOneOf(err error, codes ...int) (int, bool) {
+	return -1, false
 }
 
-type DBConfigService interface {
-	BaseConfig
-	CommonDBConfig
+func (f *mockErrFmt) ErrorWithCode(_ error, _ int) error {
+	return errMockFormatterSvc
+}
+
+func (f *mockErrFmt) ErrWithCode(_ error, _ int) error {
+	return errMockFormatterSvc
+}
+
+func (f *mockErrFmt) ErrorGetCode(_ error) int {
+	return -1
+}
+
+func (f *mockErrFmt) ErrGetCode(_ error) int {
+	return -1
+}
+
+func (f *mockErrFmt) ErrorNoWrap(_ error) error {
+	return errMockFormatterSvc
+}
+
+func (f *mockErrFmt) ErrNoWrap(_ error) error {
+	return errMockFormatterSvc
+}
+
+func (f *mockErrFmt) ErrorOnly(_ error, _ ...string) error {
+	return errMockFormatterSvc
+}
+
+func (f *mockErrFmt) Error(_ error, _ ...string) error {
+	return errMockFormatterSvc
+}
+
+func (f *mockErrFmt) Errorf(_ error, _ string, _ ...interface{}) error {
+	return errMockFormatterSvc
+}
+
+func (f *mockErrFmt) NewError(_ ...string) error {
+	return errMockFormatterSvc
+}
+
+func (f *mockErrFmt) NewErrorf(_ string, _ ...interface{}) error {
+	return errMockFormatterSvc
+}
+
+func NewMockErrFormatter() *mockErrFmt {
+	return &mockErrFmt{}
 }

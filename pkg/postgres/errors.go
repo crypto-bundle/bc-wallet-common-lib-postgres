@@ -30,46 +30,33 @@
 
 package postgres
 
-import "log/slog"
+//nolint:gochecknoglobals // it's ok
+var defaultErrorsFmtSvc errorFormatterService = newConfigErrFormatter()
 
-type loggerService interface {
-	NewSlogLoggerEntry(fields ...any) *slog.Logger
-	NewSlogNamedLoggerEntry(named string, fields ...any) *slog.Logger
-	NewSlogLoggerEntryWithFields(fields ...slog.Attr) *slog.Logger
+func ErrorNoWrap(err error) error {
+	return defaultErrorsFmtSvc.ErrorNoWrap(err)
 }
 
-//nolint:interfacebloat //it's ok here, we need it we must use it as one big interface
-type errorFormatterService interface {
-	// ErrorNoWrap function for pseudo-wrap error, must be used in case of linter warnings...
-	ErrorNoWrap(err error) error
-	// ErrNoWrap same with ErrorNoWrap function, just alias for ErrorNoWrap, just short function name...
-	ErrNoWrap(err error) error
-	ErrorOnly(err error, details ...string) error
-	Error(err error, details ...string) error
-	Errorf(err error, format string, args ...interface{}) error
-	NewError(details ...string) error
-	NewErrorf(format string, args ...interface{}) error
+func ErrNoWrap(err error) error {
+	return defaultErrorsFmtSvc.ErrNoWrap(err)
 }
 
-type BaseConfig interface {
-	IsDebug() bool
+func ErrorOnly(err error, details ...string) error {
+	return defaultErrorsFmtSvc.ErrorOnly(err, details...)
 }
 
-type CommonDBConfig interface {
-	GetDBHost() string
-	GetDBPort() uint16
-	GetDBName() string
-	GetDBUser() string
-	GetDBPassword() string
-	GetDBTLSMode() string
-	GetDBRetryCount() uint8
-	GetDBConnectTimeOut() uint16
-
-	GetDBMaxOpenConns() uint8
-	GetDBMaxIdleConns() uint8
+func Error(err error, details ...string) error {
+	return defaultErrorsFmtSvc.Error(err, details...)
 }
 
-type DBConfigService interface {
-	BaseConfig
-	CommonDBConfig
+func Errorf(err error, format string, args ...interface{}) error {
+	return defaultErrorsFmtSvc.Errorf(err, format, args...)
+}
+
+func NewError(details ...string) error {
+	return defaultErrorsFmtSvc.NewError(details...)
+}
+
+func NewErrorf(format string, args ...interface{}) error {
+	return defaultErrorsFmtSvc.NewErrorf(format, args...)
 }

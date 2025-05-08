@@ -129,7 +129,7 @@ func (c *Connection) Connect() (*Connection, error) {
 	for i := retryCount; i != 0; i -= retryDecValue {
 		dbx, loopErr := c.tryConnect()
 		if loopErr != nil {
-			c.l.Error("unable to connect to database", loopErr,
+			c.l.Error("unable to connect to database", slog.Any("error", loopErr),
 				slog.Int(ConnectionRetryCountTag, try))
 
 			err = loopErr
