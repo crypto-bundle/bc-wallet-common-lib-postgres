@@ -3,6 +3,8 @@
 ## [v0.0.12] - 06.05.2025
 ### Changed
 * Added internal error formatter service
+  * Added default error formatter
+  * Added flow of replacement default formatter by external from application level 
 
 ## [v0.0.11] - 07.03.2025
 ### Changed
